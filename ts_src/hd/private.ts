@@ -1,34 +1,39 @@
+import { sha256 } from "@noble/hashes/sha256";
 import {
-  bytesToHex as toHex,
   hexToBytes as fromHex,
+  bytesToHex as toHex,
 } from "@noble/hashes/utils";
+import * as tinysecp from "bells-secp256k1";
+import HDKey from "browser-hdkey";
+import {
+  crypto as libCrypto,
+  Network,
+  networks,
+  Psbt,
+  Signer,
+} from "luckycoinjs-lib";
+import ECPairFactory, { ECPairInterface } from "luckycoinpair";
+import { mnemonicToSeed } from "nintondo-bip39";
+import { toXOnly } from "../utils/util";
+import { BaseWallet } from "./base";
 import { ZERO_KEY, ZERO_PRIVKEY } from "./common";
 import {
+  AddressType,
+  FromMnemonicOpts,
+  FromSeedOpts,
+  Hex,
   Keyring,
   PrivateKeyOptions,
   SerializedHDKey,
-  Hex,
   ToSignInput,
-  FromSeedOpts,
-  FromMnemonicOpts,
-  AddressType,
 } from "./types";
-import { BaseWallet } from "./base";
-import * as tinysecp from "bells-secp256k1";
-import { mnemonicToSeed } from "nintondo-bip39";
-import ECPairFactory, { ECPairInterface } from "belpair";
-import { Network, networks, Psbt, Signer } from "belcoinjs-lib";
-import HDKey from "browser-hdkey";
-import { sha256 } from "@noble/hashes/sha256";
-import { crypto as belCrypto } from "belcoinjs-lib";
-import { toXOnly } from "../utils/util";
 
 const ECPair = ECPairFactory(tinysecp);
 
 const DEFAULT_HD_PATH = "m/44'/0'/0'/0";
 
 function tapTweakHash(pubKey: Buffer, h: Buffer | undefined): Buffer {
-  return belCrypto.taggedHash(
+  return libCrypto.taggedHash(
     "TapTweak",
     Buffer.concat(h ? [pubKey, h] : [pubKey])
   );
@@ -56,9 +61,7 @@ function tweakSigner(
     throw new Error("Invalid tweaked private key!");
   }
 
-  return ECPair.fromPrivateKey(Buffer.from(tweakedPrivateKey), {
-    network: opts.network,
-  });
+  return ECPair.fromPrivateKey(Buffer.from(tweakedPrivateKey));
 }
 
 class HDPrivateKey extends BaseWallet implements Keyring<SerializedHDKey> {
@@ -168,7 +171,7 @@ class HDPrivateKey extends BaseWallet implements Keyring<SerializedHDKey> {
         !input.disableTweakSigner
       ) {
         const signer = tweakSigner(account, {
-          network: this.network ?? networks.bellcoin,
+          network: networks.luckycoin,
         });
         psbt.signInput(input.index, signer, input.sighashTypes);
       } else {
@@ -194,7 +197,7 @@ class HDPrivateKey extends BaseWallet implements Keyring<SerializedHDKey> {
         !disableTweakSigner
       ) {
         const signer = tweakSigner(account, {
-          network: this.network ?? networks.bellcoin,
+          network: networks.luckycoin,
         });
         psbt.signInput(
           idx,
@@ -241,7 +244,7 @@ class HDPrivateKey extends BaseWallet implements Keyring<SerializedHDKey> {
         !input.disableTweakSigner
       ) {
         const signer = tweakSigner(account, {
-          network: this.network ?? networks.bellcoin,
+          network: networks.luckycoin,
         });
         psbt.signInput(input.index, signer, input.sighashTypes);
       } else {
@@ -294,7 +297,6 @@ class HDPrivateKey extends BaseWallet implements Keyring<SerializedHDKey> {
     this.publicKey = this.root.publicKey!;
 
     this.addressType = opts.addressType;
-    this.network = opts.network;
 
     return this;
   }
@@ -311,10 +313,7 @@ class HDPrivateKey extends BaseWallet implements Keyring<SerializedHDKey> {
   }
 
   async fromMnemonic(opts: FromMnemonicOpts): Promise<HDPrivateKey> {
-    const seed = await mnemonicToSeed(
-      opts.mnemonic,
-      opts.passphrase ?? "bells"
-    );
+    const seed = await mnemonicToSeed(opts.mnemonic, opts.passphrase ?? "lky");
 
     this.fromSeed({
       seed,

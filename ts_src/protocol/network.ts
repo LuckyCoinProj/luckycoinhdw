@@ -1,8 +1,7 @@
-import TimeData from "./timedelta";
-import { VERSION_TOP_MASK } from "./consensus";
 import { search } from "../utils/binary";
+import { VERSION_TOP_MASK } from "./consensus";
+import TimeData from "./timedelta";
 import { NetType } from "./types";
-import { MAINNET } from "./networks";
 
 class Network {
   network: NetType;
@@ -13,7 +12,7 @@ class Network {
   unknownBits: unknown;
   time: TimeData;
 
-  constructor(network: NetType = MAINNET) {
+  constructor(network: NetType) {
     this.network = network;
     this.checkpoints = [];
     this.unknownBits = ~VERSION_TOP_MASK;
@@ -107,14 +106,6 @@ class Network {
 
   static fromBech32m(hrp: string, network?: NetType): Network {
     return Network.by(hrp, cmpBech32, network, "bech32m address");
-  }
-
-  toString(): string {
-    return this.network.type;
-  }
-
-  inspect(): string {
-    return `<Network: ${this.network.type}>`;
   }
 
   static isNetwork(obj: unknown): boolean {

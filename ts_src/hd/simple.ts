@@ -1,23 +1,28 @@
+import { sha256 } from "@noble/hashes/sha256";
+import { bytesToHex, hexToBytes } from "@noble/hashes/utils";
+import * as tinysecp from "bells-secp256k1";
+import {
+  crypto as libCrypto,
+  Network,
+  networks,
+  Psbt,
+  Signer,
+} from "luckycoinjs-lib";
+import ECPairFactory, { ECPairInterface } from "luckycoinpair";
+import { toXOnly } from "../utils/util";
+import { BaseWallet } from "./base";
+import { ZERO_KEY, ZERO_PRIVKEY } from "./common";
 import {
   AddressType,
   Keyring,
   SerializedSimpleKey,
   ToSignInput,
 } from "./types";
-import { ZERO_KEY, ZERO_PRIVKEY } from "./common";
-import { bytesToHex, hexToBytes } from "@noble/hashes/utils";
-import { BaseWallet } from "./base";
-import * as tinysecp from "bells-secp256k1";
-import ECPairFactory, { ECPairInterface } from "belpair";
-import { Network, networks, Psbt, Signer } from "belcoinjs-lib";
-import { sha256 } from "@noble/hashes/sha256";
-import { crypto as belCrypto } from "belcoinjs-lib";
-import { toXOnly } from "../utils/util";
 
 const ECPair = ECPairFactory(tinysecp);
 
 function tapTweakHash(pubKey: Buffer, h: Buffer | undefined): Buffer {
-  return belCrypto.taggedHash(
+  return libCrypto.taggedHash(
     "TapTweak",
     Buffer.concat(h ? [pubKey, h] : [pubKey])
   );
@@ -45,9 +50,7 @@ function tweakSigner(
     throw new Error("Invalid tweaked private key!");
   }
 
-  return ECPair.fromPrivateKey(Buffer.from(tweakedPrivateKey), {
-    network: opts.network,
-  });
+  return ECPair.fromPrivateKey(Buffer.from(tweakedPrivateKey));
 }
 
 class HDSimpleKey extends BaseWallet implements Keyring<SerializedSimpleKey> {
@@ -109,7 +112,6 @@ class HDSimpleKey extends BaseWallet implements Keyring<SerializedSimpleKey> {
     this.privateKey = wallet.privateKey;
     this.pair = wallet.pair;
     this.addressType = wallet.addressType;
-    this.network = state.network;
     return this;
   }
 
@@ -123,7 +125,6 @@ class HDSimpleKey extends BaseWallet implements Keyring<SerializedSimpleKey> {
     }
 
     const wallet = new this(pair.privateKey!);
-    wallet.network = state.network;
     wallet.addressType = state.addressType;
     wallet.initPair();
     return wallet;
@@ -155,7 +156,7 @@ class HDSimpleKey extends BaseWallet implements Keyring<SerializedSimpleKey> {
         !input.disableTweakSigner
       ) {
         const signer = tweakSigner(account, {
-          network: this.network ?? networks.bellcoin,
+          network: networks.luckycoin,
         });
         psbt.signInput(input.index, signer, input.sighashTypes);
       } else {
@@ -186,7 +187,7 @@ class HDSimpleKey extends BaseWallet implements Keyring<SerializedSimpleKey> {
         !disableTweakSigner
       ) {
         const signer = tweakSigner(this.pair!, {
-          network: this.network ?? networks.bellcoin,
+          network: networks.luckycoin,
         });
         psbt.signInput(
           idx,
@@ -232,7 +233,7 @@ class HDSimpleKey extends BaseWallet implements Keyring<SerializedSimpleKey> {
         !input.disableTweakSigner
       ) {
         const signer = tweakSigner(this.pair!, {
-          network: this.network ?? networks.bellcoin,
+          network: networks.luckycoin,
         });
         psbt.signInput(input.index, signer, input.sighashTypes);
       } else {

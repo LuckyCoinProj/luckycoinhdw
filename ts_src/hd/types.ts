@@ -1,4 +1,4 @@
-import { Network, Psbt } from "belcoinjs-lib";
+import { Network, Psbt } from "luckycoinjs-lib";
 
 export type Base58String = string;
 
@@ -93,7 +93,6 @@ export type Keyring<State> = {
     inputIndex: number;
     partialSig: { pubkey: Buffer; signature: Buffer }[];
   }[];
-  setNetwork(network: Network): void;
 };
 
 export const DISALLOWED_CHILD_METHODS: (keyof Keyring<any>)[] = [

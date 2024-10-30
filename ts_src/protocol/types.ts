@@ -24,10 +24,7 @@ interface AddressPrefix {
   bech32: string;
 }
 
-export type NetworkType = "main" | "testnet";
-
 export interface NetType {
-  type: NetworkType;
   magic: number;
   checkpointMap: Record<number, Uint8Array>;
   deployments: Record<string, Deployment>;
