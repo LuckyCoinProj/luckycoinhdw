@@ -6,7 +6,7 @@
   "types": "./src/index.d.ts",
   "scripts": {
     "audit": "better-npm-audit audit -l high",
-    "build": "npm run clean && tsc -p ./tsconfig.json",
+    "build": "npm run clean && tsc -p ./tsconfig.json && npm run formatjs",
     "build:tests": "npm run clean:jstests && tsc -p ./tests/tsconfig.json",
     "clean": "rimraf src",
     "clean:jstests": "rimraf 'tests/**/!(ts-node-register)*.js'",
