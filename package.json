@@ -1,6 +1,6 @@
 {
   "name": "luckycoinhdw",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "The LuckyCoin HD Wallet library",
   "main": "./src/index.js",
   "types": "./src/index.d.ts",
