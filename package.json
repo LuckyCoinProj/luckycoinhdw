@@ -40,8 +40,8 @@
     "bells-secp256k1": "0.1.1",
     "bn.js": "5.2.1",
     "browser-hdkey": "0.1.9",
-    "luckycoinjs-lib": "github:impredmet/luckycoinjs-lib",
-    "luckycoinpair": "github:impredmet/luckycoinpair",
+    "luckycoinjs-lib": "^0.0.2",
+    "luckycoinpair": "^0.0.2",
     "nintondo-bip39": "1.0.0"
   },
   "devDependencies": {
